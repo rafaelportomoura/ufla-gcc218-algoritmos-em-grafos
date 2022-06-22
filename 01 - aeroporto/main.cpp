@@ -36,9 +36,9 @@ void test_case(int aeroportos, int voos, int teste) {
 
   cout << "Teste " << teste << endl;
   for (int i = 0; i < j; i++) {
-    cout << pos_maior[i] << " ";
+    cout << pos_maior[i];
+    if (i < j -1 ) cout << " ";
   }
-  cout << endl << endl;
 }
 
 
@@ -48,6 +48,7 @@ int main() {
   do {
     cin >> aeroporto >> voos;
     if (aeroporto && voos) {
+      if (teste > 1)  cout << "\n\n";
       test_case(aeroporto, voos, teste);
       teste++;
     }
