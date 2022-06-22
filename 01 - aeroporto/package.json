@@ -1,0 +1,16 @@
+{
+  "name": "01---aeroporto",
+  "version": "1.0.0",
+  "description": "## Descrição",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "python3 ../util/runner.py main.exe test/1.in",
+    "comp": "python3 ../util/compiler.py main"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
