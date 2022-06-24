@@ -9,9 +9,6 @@ enum COLORS {
   BLACK
 };
 
-void debug_print( string text ) {
-  cout << text;
-}
 
 struct Traits {
   int id;
