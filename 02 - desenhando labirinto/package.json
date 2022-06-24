@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "python3 ../util/runner.py main.exe test/1.in",
+    "test": "python3 ../util/runner.py main.exe test/1.in test/1.out",
     "comp": "python3 ../util/compiler.py main"
   },
   "keywords": [],
