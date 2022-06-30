@@ -96,10 +96,8 @@ class Graph {
   int bfs( Vertix* focused_vertix ) {
     int distance = 0;
     vector<Vertix*> sons = focused_vertix->getSons();
-    bool have_son = false;
     for ( Vertix* son : sons ) {
       if ( son->getColor() == WHITE ) {
-        have_son = true;
         son->setColor( GRAY );
         son->setDistance( focused_vertix->getDistance() + 1 );
         son->setFather( focused_vertix );
@@ -128,8 +126,9 @@ class Graph {
 
   friend ostream& operator<<( ostream& output, const Graph& g ) {
     for ( Vertix* v : g.all_vertixs ) {
-      cout << *v << endl;
+      output << *v << endl;
     }
+    return output;
   }
 
 };
