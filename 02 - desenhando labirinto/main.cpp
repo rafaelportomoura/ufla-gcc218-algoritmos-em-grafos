@@ -147,16 +147,17 @@ int testCase() {
     g.addEdge( source, target );
   }
   int distance = g.makeDraw();
-  cout << g;
-  cout << "\nDistance: " << distance << endl;
-  cout << endl << endl;
+  // cout << g;
+  // cout << "\nDistance: " << distance << endl;
+  // cout << endl << endl;
+  return distance;
 }
 
 int main() {
   int tests;
   cin >> tests;
   for ( int i = 0; i < tests; i++ ) {
-    testCase();
+    cout << testCase() << endl;
   }
   return 0;
 }
