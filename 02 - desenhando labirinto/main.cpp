@@ -1,85 +1,162 @@
 #include <iostream>
 #include <vector>
+#include <queue>
+
 using namespace std;
 
-enum { ORIGIN, TARGET };
+enum COLOR { WHITE, GRAY, BLACK };
 
-int bfs( int number_of_vertixs, int** Matrix, vector<int>& stack, int moves = 0 ) {
-  int searched = stack.back();
-  stack.pop_back();
-  for ( int colunm = 0; colunm < number_of_vertixs; colunm++ ) {
-    if ( Matrix[searched][colunm] == 1 ) {
-      stack.push_back( colunm );
-      for ( int index = 0; index < number_of_vertixs; index++ ) {
-        if ( Matrix[index][colunm] ) Matrix[index][colunm]++;
+
+class Vertix {
+  private:
+  int id;
+  COLOR color;
+  Vertix* father;
+  int distance;
+  vector<Vertix*> sons;
+  public:
+  Vertix( int id ) {
+    father = NULL;
+    color = WHITE;
+    distance = 0;
+    this->id = id;
+  }
+  void setId( int id ) { this->id = id; }
+  int getId() { return this->id; }
+  COLOR getColor() { return color; }
+  void setColor( COLOR color ) { this->color = color; }
+  Vertix* getFather() { return father; }
+  void setFather( Vertix* father ) { this->father = father; }
+  int getDistance() { return distance; }
+  void setDistance( int distance ) { this->distance = distance; }
+  vector<Vertix*> getSons() { return this->sons; }
+  void setSon( Vertix* son ) {
+    for ( Vertix* old_son : sons ) {
+      if ( old_son == son ) return;
+    }
+    this->sons.push_back( son );
+  }
+  friend bool operator==( Vertix& esse, Vertix& other ) {
+    return esse.getId() == other.getId();
+  }
+  friend ostream& operator<<( ostream& output, const Vertix& v ) {
+    output << "(" << v.id << ")";
+    if ( v.father ) {
+
+      output << "\n\tf: " << v.father->getId();
+    }
+    else {
+
+      output << "\n\tf: " << "NULL";
+    }
+    output << "\n\tc: " << v.color;
+    output << "\n\td: " << v.distance;
+    output << "\n\tsons: {";
+    for ( Vertix* son : v.sons ) {
+      output << " (" << son->getId() << ")";
+    }
+    output << " }\n";
+    return output;
+  }
+};
+
+class Graph {
+  private:
+  Vertix* root;
+  vector<Vertix*> all_vertixs;
+  queue<int> drawing_queue;
+  public:
+  Graph( int root ) {
+    this->root = new Vertix( root );
+    all_vertixs.push_back( this->root );
+  }
+  Vertix* getVertix( int id ) {
+    for ( Vertix* vertix : all_vertixs ) {
+      if ( vertix->getId() == id ) return vertix;
+    }
+    return NULL;
+  }
+  Vertix* addVertix( int id ) {
+    Vertix* vertix = getVertix( id );
+    if ( vertix ) return vertix;
+
+    vertix = new Vertix( id );
+    all_vertixs.push_back( vertix );
+
+    return vertix;
+  }
+  void addEdge( int source, int target ) {
+    Vertix* source_vertix = addVertix( source );
+    Vertix* target_vertix = addVertix( target );
+
+    source_vertix->setSon( target_vertix );
+    target_vertix->setSon( source_vertix );
+  }
+
+  int bfs( Vertix* focused_vertix ) {
+    int distance = 0;
+    vector<Vertix*> sons = focused_vertix->getSons();
+    bool have_son = false;
+    for ( Vertix* son : sons ) {
+      if ( son->getColor() == WHITE ) {
+        have_son = true;
+        son->setColor( GRAY );
+        son->setDistance( focused_vertix->getDistance() + 1 );
+        son->setFather( focused_vertix );
+        this->drawing_queue.push( son->getId() );
+        distance += 2;
       }
-      Matrix[colunm][searched]++;
-      moves += 2;
+    }
+    return distance;
+  }
+
+  int makeDraw() {
+    this->root->setColor( GRAY );
+    int distance = 0;
+    this->drawing_queue.push( this->root->getId() );
+    while ( !this->drawing_queue.empty() ) {
+      Vertix* focused_vertix = this->getVertix( this->drawing_queue.front() );
+      this->drawing_queue.pop();
+      COLOR color = focused_vertix->getColor();
+      if ( color == GRAY ) {
+        distance += bfs( focused_vertix );
+      }
+      focused_vertix->setColor( BLACK );
+    }
+    return distance;
+  }
+
+  friend ostream& operator<<( ostream& output, const Graph& g ) {
+    for ( Vertix* v : g.all_vertixs ) {
+      cout << *v << endl;
     }
   }
-  return moves;
-}
+
+};
 
 
-int search( int number_of_vertixs, int** Matrix, int searched ) {
-  vector<int> stack;
-  stack.push_back( searched );
-  int moves = 0;
-  while ( !stack.empty() ) {
-    moves = bfs( number_of_vertixs, Matrix, stack, moves );
-
-  }
-  return moves;
-}
-
-int* getEdge() {
-  int origin, target;
-  cin >> origin >> target;
-  int* edge = new int[2];
-  edge[0] = origin;
-  edge[1] = target;
-  return edge;
-}
-
-int doTest() {
+int testCase() {
+  int vertixs;
+  int edges;
   int root;
-  cin >> root;
-  int number_of_vertixs, number_of_edges;
-  cin >> number_of_vertixs >> number_of_edges;
-  int** AdjancyMatrix = new int* [number_of_vertixs];
-
-  for ( int i = 0; i < number_of_vertixs; i++ ) {
-    AdjancyMatrix[i] = new int[number_of_vertixs];
-    for ( int j = 0; j < number_of_vertixs; j++ ) {
-      AdjancyMatrix[i][j] = 0;
-    }
+  cin >> root >> vertixs >> edges;
+  Graph g( root );
+  for ( int i = 0; i < edges; ++i ) {
+    int source, target;
+    cin >> source >> target;
+    g.addEdge( source, target );
   }
-
-  for ( int i = 0; i < number_of_edges; i++ ) {
-    int* edge = getEdge();
-    int origin = edge[ORIGIN];
-    int target = edge[TARGET];
-    AdjancyMatrix[origin][target] = 1;
-    AdjancyMatrix[target][origin] = 1;
-  }
-
-  int moves = search( number_of_vertixs, AdjancyMatrix, root );
-
-
-  return moves;
+  int distance = g.makeDraw();
+  cout << g;
+  cout << "\nDistance: " << distance << endl;
+  cout << endl << endl;
 }
-
 
 int main() {
-  int tests = 0;
+  int tests;
   cin >> tests;
-  int* testes_results = new int[tests];
-  for ( int number_test = 0; number_test < tests; number_test++ ) {
-    int test_result = doTest();
-    testes_results[number_test] = test_result;
-  }
-  for ( int test = 0; test < tests; test++ ) {
-    cout << testes_results[test] << endl;
+  for ( int i = 0; i < tests; i++ ) {
+    testCase();
   }
   return 0;
 }
