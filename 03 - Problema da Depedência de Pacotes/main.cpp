@@ -13,7 +13,7 @@ int min( int a, int b ) {
 }
 
 class Package {
-  private:
+private:
   vector<Package*> dependencies;
   Package* father;
   int id;
@@ -22,7 +22,7 @@ class Package {
   int find_time;
   bool articulation;
   int entry_degree;
-  public:
+public:
   Package( int id ) {
     this->id = id;
     this->color = WHITE;
@@ -85,7 +85,7 @@ class Package {
 };
 
 class Compiler {
-  private:
+private:
   Package** packages;
   vector<pair<int, int>> bridges;
   int number_of_package;
@@ -168,7 +168,7 @@ class Compiler {
     }
   }
 
-  public:
+public:
   Compiler( int number_of_package ) {
     this->number_of_package = number_of_package;
     this->loop_packages = number_of_package + 1;
@@ -210,7 +210,7 @@ class Compiler {
     for ( pair<int, int> bridge : c.bridges ) {
       cout << bridge.first << "->" << bridge.second << endl;
     }
-    cout << "[ORDERED VECTOR]\n";
+    cout << endl << "[ORDERED VECTOR]\n";
     for ( Package p : c.ordered_packages ) {
       cout << p.getId() << " ";
     }
