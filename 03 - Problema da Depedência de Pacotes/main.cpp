@@ -1,6 +1,8 @@
 #include<iostream>
 #include<vector>
 #include <utility>
+#include<queue>
+#include <sstream>
 using namespace std;
 
 enum COLOR { WHITE, GRAY, BLACK };
@@ -19,6 +21,7 @@ class Package {
   int low;
   int find_time;
   bool articulation;
+  int entry_degree;
   public:
   Package( int id ) {
     this->id = id;
@@ -27,6 +30,7 @@ class Package {
     this->find_time = 0;
     this->father = NULL;
     this->articulation = false;
+    this->entry_degree = 0;
   }
   COLOR getColor() { return color; }
   void setColor( COLOR color ) { this->color = color; }
@@ -60,6 +64,9 @@ class Package {
   void setLow( int low ) { this->low = low; }
   bool isArticulation() { return this->articulation; }
   void setArticulation( bool isArticulation ) { this->articulation = isArticulation; }
+  int getEntryDegree() { return this->entry_degree; }
+  void increaseEntryDegree() { this->entry_degree++; }
+  void decreaseEntryDegree() { this->entry_degree--; }
   friend ostream& operator<<( ostream& output, const Package& pack ) {
     output << "\nid: " << pack.id;
     output << "\ncolor: " << pack.color;
@@ -85,6 +92,7 @@ class Compiler {
   int loop_packages;
   int loop_init;
   int root;
+  vector<Package> ordered_packages;
 
   void setRoot( int root ) {
     this->root = root;
@@ -111,9 +119,53 @@ class Compiler {
       else if ( dependency->getId() != package->getFatherID() ) {
         package->setLow( min( package->getLow(), dependency->getLow() ) );
       }
+      else if ( dependency->getId() == package->getFatherID() ) {
+        stringstream stream_dependency;
+        stream_dependency << dependency->getId();
+        string dependency_id;
+        stream_dependency >> dependency_id;
+
+        stringstream stream_package;
+        stream_package << package->getId();
+        string package_id;
+        stream_package >> package_id;
+
+        string message = "Circular dependency between ";
+        message += package_id;
+        message += " and ";
+        message += dependency_id;
+        throw runtime_error( message.c_str() );
+      }
     }
 
     package->setColor( BLACK );
+  }
+
+  void topologinal_ordering() {
+    queue<int> ordering_queue;
+    for ( int id = this->loop_init; id < this->loop_packages; id++ ) {
+      if ( !this->packages[id]->getEntryDegree() ) {
+        ordering_queue.push( id );
+      }
+    }
+
+    int source;
+
+    while ( !ordering_queue.empty() ) {
+      source = ordering_queue.front();
+      ordering_queue.pop();
+
+      ordered_packages.push_back( source );
+
+      vector<Package*> dependecies = this->packages[source]->getDependencies();
+      for ( Package* dependency : dependecies ) {
+        dependency->decreaseEntryDegree();
+        if ( !dependency->getEntryDegree() ) {
+          ordering_queue.push( dependency->getId() );
+        }
+      }
+
+    }
   }
 
   public:
@@ -134,6 +186,7 @@ class Compiler {
   }
   void addDependency( int source, int target ) {
     packages[source]->setDependencie( packages[target] );
+    packages[target]->increaseEntryDegree();
   }
   void dfs() {
     int time = 0;
@@ -145,6 +198,7 @@ class Compiler {
         this->packages[id]->setArticulation( filhos_raiz > 1 );
       }
     }
+    topologinal_ordering();
   }
 
   friend ostream& operator<<( ostream& output, const Compiler& c ) {
@@ -156,6 +210,10 @@ class Compiler {
     for ( pair<int, int> bridge : c.bridges ) {
       cout << bridge.first << "->" << bridge.second << endl;
     }
+    cout << "[ORDERED VECTOR]\n";
+    for ( Package p : c.ordered_packages ) {
+      cout << p.getId() << " ";
+    }
     return output;
   }
 
@@ -163,16 +221,23 @@ class Compiler {
 
 
 int main() {
-  int number_of_package, number_of_dependencies;
-  cin >> number_of_package >> number_of_dependencies;
-  int source, target;
-  Compiler compiler( number_of_package );
-  for ( int i = 0; i < number_of_dependencies; i++ ) {
-    cin >> source >> target;
-    compiler.addDependency( source, target );
+  try {
+    int number_of_package, number_of_dependencies;
+    cin >> number_of_package >> number_of_dependencies;
+    int source, target;
+    Compiler compiler( number_of_package );
+    for ( int i = 0; i < number_of_dependencies; i++ ) {
+      cin >> source >> target;
+      compiler.addDependency( source, target );
+    }
+    compiler.dfs();
+    cout << compiler;
   }
-  compiler.dfs();
-  cout << compiler;
+  catch ( const std::exception& e ) {
+    std::cerr << e.what() << '\n';
+  }
+
+
 
   return 0;
 }
