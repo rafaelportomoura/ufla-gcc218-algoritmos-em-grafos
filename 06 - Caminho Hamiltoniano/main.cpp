@@ -37,7 +37,8 @@ vi caminhoHamiltoniano( vi* LA, int n, int* grau_entrada ) {
     int menor_filho = n + 1;
     menor = -1;
     for ( int vertice : vertice_busca ) {
-      if ( grau_entrada[vertice] >= 0 && grau_entrada[vertice] < menor_filho ) {
+      grau_entrada[vertice]--;
+      if ( grau_entrada[vertice] == 0 && grau_entrada[vertice] < menor_filho ) {
         menor_filho = grau_entrada[vertice];
         menor = vertice;
       }
