@@ -14,12 +14,22 @@ struct Aresta {
   }
 };
 
+struct Resultado {
+  int kruskall;
+  int outro = 0;
+};
+
+ostream& operator<<( ostream& output, const Resultado r ) {
+  output << r.kruskall << " " << r.outro;
+  return output;
+}
+
 
 class DisjointSet {
-  private:
+private:
   int* pai;
   int* rank;
-  public:
+public:
   DisjointSet( int n ) {
     pai = new int[n];
     rank = new int[n];
@@ -63,7 +73,7 @@ class DisjointSet {
 
 
 class Hill_Valey {
-  public:
+public:
   Hill_Valey( const int pontos_principais, const int ligacoes ) {
     this->ligacoes = ligacoes;
     this->pontos_principais = pontos_principais;
@@ -87,7 +97,13 @@ class Hill_Valey {
     }
     return resultado;
   }
-  private:
+  Resultado retorna_resultados() {
+    Resultado resultado;
+    resultado.kruskall = this->Kruskall();
+
+    return resultado;
+  }
+private:
   int pontos_principais;
   int ligacoes;
   vector<Aresta> arestas;
@@ -110,7 +126,7 @@ int main() {
   for ( int caso = 0; caso < casos_de_teste; caso++ ) {
     cin >> pontos_principais >> ligacoes;
     hill_valey[caso] = new Hill_Valey( pontos_principais, ligacoes );
-    cout << hill_valey[caso]->Kruskall();
+    cout << hill_valey[caso]->retorna_resultados();
     if ( caso < casos_de_teste - 1 ) cout << endl;
   }
 }
