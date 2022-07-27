@@ -1,14 +1,8 @@
 #include <iostream>
 #include <vector>
+#include "../../Libs/Status.hpp"
 
 using namespace std;
-
-enum Color {
-  WHITE,
-  GRAY,
-  BLACK
-};
-
 struct Edges {
   int u;
   int v;
@@ -33,11 +27,11 @@ int min( int a, int b ) {
 }
 
 class Vertex {
-public:
+  public:
   Vertex( int id ) {
     this->id = id;
     this->father = NULL;
-    this->color = WHITE;
+    this->status = NOT_VISITED;
     this->find_time = 0;
     this->low = 0;
     articulation = false;
@@ -49,8 +43,8 @@ public:
     this->father = father;
   }
   Vertex* getFather() { return this->father; }
-  void changeColor( Color c ) { this->color = c; }
-  Color getColor() { return this->color; }
+  void changeStatus( Status c ) { this->status = c; }
+  Status getStatus() { return this->status; }
   void addEdge( Vertex* target ) {
     if ( !target ) return;
 
@@ -59,7 +53,7 @@ public:
   vector<Vertex*> getEdges() { return this->edges; }
   friend ostream& operator<<( ostream& output, const Vertex v ) {
     output << "ID: " << v.id + 1;
-    output << "\n\tColor: " << v.color;
+    output << "\n\tStatus: " << v.status;
     output << "\n\tLow: " << v.low;
     output << "\n\tFind Time: " << v.find_time;
     string articulation = v.articulation ? "True" : "False";
@@ -80,10 +74,10 @@ public:
   int getFindTime() { return this->find_time; }
   void setArticulation( bool articulation ) { this->articulation = articulation; }
   bool getArticulation() { return this->articulation; }
-private:
+  private:
   int id;
   Vertex* father;
-  Color color;
+  Status status;
   vector<Vertex*> edges;
   int low;
   int find_time;
@@ -91,7 +85,7 @@ private:
 };
 
 class Graph {
-public:
+  public:
   Graph( int number_of_vertex ) {
     this->number_of_vertex = number_of_vertex;
     this->adjacency_list = new Vertex * [number_of_vertex];
@@ -121,7 +115,7 @@ public:
     int low = cont_dfs;
     int find_time = cont_dfs;
     Vertex* tarjan_vertex = this->adjacency_list[id];
-    tarjan_vertex->changeColor( GRAY );
+    tarjan_vertex->changeStatus( VISITED );
     tarjan_vertex->setLow( low );
     tarjan_vertex->setFindTime( find_time );
     vector<Vertex*> adjacency_vertex;
@@ -130,7 +124,7 @@ public:
       if ( id == root ) {
         sons_of_root++;
       }
-      if ( v->getColor() == WHITE ) {
+      if ( v->getStatus() == NOT_VISITED ) {
         v->setFather( tarjan_vertex );
         TARJAN( v->getId(), cont_dfs, root, sons_of_root );
         if ( v->getLow() >= tarjan_vertex->getLow() ) {
@@ -146,13 +140,12 @@ public:
         tarjan_vertex->setLow( min( tarjan_vertex->getLow(), v->getLow() ) );
       }
     }
-    tarjan_vertex->changeColor( BLACK );
   }
 
   void DFS() {
     vector<int> stack;
     for ( int id = 0; id < this->number_of_vertex; id++ ) {
-      if ( this->adjacency_list[id]->getColor() == WHITE ) {
+      if ( this->adjacency_list[id]->getStatus() == NOT_VISITED ) {
         int sons = 0;
         TARJAN( id, 0, id, sons );
         this->adjacency_list[id]->setArticulation( sons > 1 );
@@ -160,7 +153,7 @@ public:
     }
   }
 
-private:
+  private:
   Vertex** adjacency_list;
   int number_of_vertex;
   vector<Edges> bridges;

@@ -1,20 +1,15 @@
 #include <iostream>
 #include <vector>
+#include "../../Libs/Status.hpp"
 
 using namespace std;
-
-enum Color {
-  WHITE,
-  GRAY,
-  BLACK
-};
 
 class Vertex {
   public:
   Vertex( int id ) {
     this->id = id;
     this->father = NULL;
-    this->color = WHITE;
+    this->status = NOT_VISITED;
   }
   int getId() { return this->id; }
   void setFather( Vertex* father ) {
@@ -23,8 +18,8 @@ class Vertex {
     this->father = father;
   }
   Vertex* getFather() { return this->father; }
-  void changeColor( Color c ) { this->color = c; }
-  Color getColor() { return this->color; }
+  void changeStatus( Status c ) { this->status = c; }
+  Status getStatus() { return this->status; }
   void addEdge( Vertex* target ) {
     if ( !target ) return;
 
@@ -33,7 +28,7 @@ class Vertex {
   vector<Vertex*> getEdges() { return this->edges; }
   friend ostream& operator<<( ostream& output, const Vertex v ) {
     output << "ID: " << v.id;
-    output << "\n\tColor: " << v.color;
+    output << "\n\tStatus: " << v.status;
     output << "\n\tFather: ";
     if ( v.father ) output << v.father->getId();
     else output << "NULL";
@@ -47,7 +42,7 @@ class Vertex {
   private:
   int id;
   Vertex* father;
-  Color color;
+  Status status;
   vector<Vertex*> edges;
 };
 
@@ -79,22 +74,21 @@ class Graph {
       vector<Vertex*> adjacency_vertex;
       adjacency_vertex = this->adjacency_list[id]->getEdges();
       for ( Vertex* v : adjacency_vertex ) {
-        if ( v->getColor() == WHITE ) {
+        if ( v->getStatus() == NOT_VISITED ) {
           stack.push_back( v->getId() );
-          v->changeColor( GRAY );
+          v->changeStatus( VISITED );
           v->setFather( this->adjacency_list[id] );
           DFS_VISIT( stack );
         }
       }
-      this->adjacency_list[id]->changeColor( BLACK );
     }
   }
   void DFS() {
     vector<int> stack;
     for ( int id = 0; id < this->number_of_vertex; id++ ) {
-      if ( this->adjacency_list[id]->getColor() == WHITE ) {
+      if ( this->adjacency_list[id]->getStatus() == NOT_VISITED ) {
         stack.push_back( id );
-        this->adjacency_list[id]->changeColor( GRAY );
+        this->adjacency_list[id]->changeStatus( VISITED );
         DFS_VISIT( stack );
       }
     }
