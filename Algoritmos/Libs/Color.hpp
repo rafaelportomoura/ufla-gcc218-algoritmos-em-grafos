@@ -16,9 +16,11 @@ ostream& operator<<( ostream& output, const Color& c ) {
 
     case GRAY:
       output << "GRAY";
+      break;
 
     case BLACK:
       output << "BLACK";
+      break;
 
     default:
       output << "NO_COLOR";
