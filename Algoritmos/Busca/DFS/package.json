@@ -1,0 +1,21 @@
+{
+  "name": "02---desenhando-labirinto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "dev": "yarn run comp && yarn run test",
+    "dev:out": "yarn run comp && yarn run test:out",
+    "dev:in": "yarn run comp && yarn run test:in",
+    "test:out": "python3 ../../../util/runner.py main.exe test/1.in test/1.out",
+    "test:in": "python3 ../../../util/runner.py main.exe test/1.in",
+    "test": "python3 ../../../util/runner.py main.exe",
+    "comp": "python3 ../../../util/compiler.py main"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
