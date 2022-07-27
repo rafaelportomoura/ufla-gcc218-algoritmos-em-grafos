@@ -33,7 +33,7 @@ int min( int a, int b ) {
 }
 
 class Vertex {
-  public:
+public:
   Vertex( int id ) {
     this->id = id;
     this->father = NULL;
@@ -80,7 +80,7 @@ class Vertex {
   int getFindTime() { return this->find_time; }
   void setArticulation( bool articulation ) { this->articulation = articulation; }
   bool getArticulation() { return this->articulation; }
-  private:
+private:
   int id;
   Vertex* father;
   Color color;
@@ -91,7 +91,7 @@ class Vertex {
 };
 
 class Graph {
-  public:
+public:
   Graph( int number_of_vertex ) {
     this->number_of_vertex = number_of_vertex;
     this->adjacency_list = new Vertex * [number_of_vertex];
@@ -116,7 +116,7 @@ class Graph {
     }
     return output;
   }
-  int TARJAN( int id, int cont_dfs ) {
+  void TARJAN( int id, int cont_dfs, int root, int& sons_of_root ) {
     cont_dfs++;
     int low = cont_dfs;
     int find_time = cont_dfs;
@@ -126,12 +126,13 @@ class Graph {
     tarjan_vertex->setFindTime( find_time );
     vector<Vertex*> adjacency_vertex;
     adjacency_vertex = tarjan_vertex->getEdges();
-    int sons = 0;
     for ( Vertex* v : adjacency_vertex ) {
-      sons++;
+      if ( id == root ) {
+        sons_of_root++;
+      }
       if ( v->getColor() == WHITE ) {
         v->setFather( tarjan_vertex );
-        TARJAN( v->getId(), cont_dfs );
+        TARJAN( v->getId(), cont_dfs, root, sons_of_root );
         if ( v->getLow() >= tarjan_vertex->getLow() ) {
           tarjan_vertex->setArticulation( true );
           if ( v->getLow() > tarjan_vertex->getLow() ) {
@@ -146,20 +147,20 @@ class Graph {
       }
     }
     tarjan_vertex->changeColor( BLACK );
-    return sons;
   }
 
   void DFS() {
     vector<int> stack;
     for ( int id = 0; id < this->number_of_vertex; id++ ) {
       if ( this->adjacency_list[id]->getColor() == WHITE ) {
-        int sons = TARJAN( id, 0 );
+        int sons = 0;
+        TARJAN( id, 0, id, sons );
         this->adjacency_list[id]->setArticulation( sons > 1 );
       }
     }
   }
 
-  private:
+private:
   Vertex** adjacency_list;
   int number_of_vertex;
   vector<Edges> bridges;
