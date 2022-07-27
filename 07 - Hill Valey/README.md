@@ -23,6 +23,7 @@ Cada caso de teste será impresso em apenas uma linha. Cada linha deve conter do
 
 ## Exemplo de Entrada
 
+```txt
 2  
 5 8  
 1 3 75  
@@ -48,8 +49,11 @@ Cada caso de teste será impresso em apenas uma linha. Cada linha deve conter do
 4 6 14  
 4 5 9  
 5 6 10  
+```
 
 ## Exemplo de Saída
 
+```txt
 110 121  
 37 37  
+```

@@ -15,12 +15,28 @@ struct Aresta {
 };
 
 struct Resultado {
-  int kruskall;
-  int outro = 0;
+  int* resultados;
+  int qtd = 0;
+  int tam = 0;
+  Resultado( int tam ) {
+    this->tam = tam;
+    this->resultados = new int[tam];
+  }
 };
 
+Resultado operator+=( Resultado& r, const int i ) {
+  if ( r.qtd >= r.tam ) return r;
+
+  r.resultados[r.qtd] = i;
+  r.qtd++;
+  return r;
+}
+
 ostream& operator<<( ostream& output, const Resultado r ) {
-  output << r.kruskall << " " << r.outro;
+  for ( int i = 0; i < r.qtd; i++ ) {
+    output << r.resultados[i];
+    if ( i < r.qtd - 1 ) output << " ";
+  }
   return output;
 }
 
@@ -86,6 +102,7 @@ public:
     int i = 0;
     int resultado = 0;
     DisjointSet dj( this->pontos_principais );
+    Aresta menor = arestas[i];
     while ( arestas_encontradas < this->pontos_principais - 1 ) {
       Aresta a = arestas[i];
       if ( !dj.mesmo_conjunto( a.u, a.v ) ) {
@@ -97,9 +114,11 @@ public:
     }
     return resultado;
   }
-  Resultado retorna_resultados() {
-    Resultado resultado;
-    resultado.kruskall = this->Kruskall();
+  Resultado retorna_resultados( int quantidade_de_resultados ) {
+    Resultado resultado( quantidade_de_resultados );
+    for ( int i = 0; i < quantidade_de_resultados; i++ ) {
+      resultado += this->Kruskall();
+    }
 
     return resultado;
   }
@@ -126,7 +145,8 @@ int main() {
   for ( int caso = 0; caso < casos_de_teste; caso++ ) {
     cin >> pontos_principais >> ligacoes;
     hill_valey[caso] = new Hill_Valey( pontos_principais, ligacoes );
-    cout << hill_valey[caso]->retorna_resultados();
+    cout << hill_valey[caso]->retorna_resultados( 2 );
     if ( caso < casos_de_teste - 1 ) cout << endl;
   }
+  cout << endl;
 }
