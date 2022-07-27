@@ -107,8 +107,8 @@ class Graph {
 };
 
 int main() {
-  int number_of_vertex, number_of_edges, root, u, v;
-  cin >> number_of_vertex >> number_of_edges >> root;
+  int number_of_vertex, number_of_edges, u, v;
+  cin >> number_of_vertex >> number_of_edges;
   Graph g( number_of_vertex );
   for ( int i = 0; i < number_of_edges; i++ ) {
     cin >> u >> v;
