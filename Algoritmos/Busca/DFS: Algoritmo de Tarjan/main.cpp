@@ -63,7 +63,7 @@ class Vertex {
     else output << "NULL";
     output << "\n\tEdges:";
     for ( Vertex* x : v.edges ) {
-      output << " " << x->getId();
+      output << " " << x->getId() + 1;
     }
     output << endl;
     return output;
