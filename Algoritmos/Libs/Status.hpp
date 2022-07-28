@@ -4,7 +4,8 @@ using namespace std;
 
 enum Status {
   NOT_VISITED,
-  VISITED
+  VISITED,
+  CFC_NULL
 };
 
 ostream& operator<<( ostream& output, const Status& s ) {
@@ -15,6 +16,10 @@ ostream& operator<<( ostream& output, const Status& s ) {
 
     case VISITED:
       output << "VISITED";
+      break;
+
+    case CFC_NULL:
+      output << "CFC_NULL";
       break;
 
     default:
