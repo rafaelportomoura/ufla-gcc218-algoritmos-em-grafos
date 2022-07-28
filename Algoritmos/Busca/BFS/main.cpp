@@ -11,7 +11,7 @@ enum Color {
 };
 
 class Vertex {
-public:
+  public:
   Vertex( int id ) {
     this->id = id;
     this->father = NULL;
@@ -49,7 +49,7 @@ public:
     output << endl;
     return output;
   }
-private:
+  private:
   vector<Vertex*> edges;
   Color color;
   Vertex* father;
@@ -58,11 +58,11 @@ private:
 };
 
 class Graph {
-public:
+  public:
   Graph( int number_of_vertex ) {
     this->number_of_vertex = number_of_vertex;
     this->adjacency_list = new Vertex * [number_of_vertex];
-    for ( int id = 0; id <= number_of_vertex; id++ ) {
+    for ( int id = 0; id < number_of_vertex; id++ ) {
       this->adjacency_list[id] = new Vertex( id );
     }
   }
@@ -101,7 +101,7 @@ public:
     }
     return output;
   }
-private:
+  private:
   Vertex** adjacency_list;
   int number_of_vertex;
 };

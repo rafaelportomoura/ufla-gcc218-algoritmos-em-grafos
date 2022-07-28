@@ -89,7 +89,7 @@ class Graph {
   Graph( int number_of_vertex ) {
     this->number_of_vertex = number_of_vertex;
     this->adjacency_list = new Vertex * [number_of_vertex];
-    for ( int id = 0; id <= number_of_vertex; id++ ) {
+    for ( int id = 0; id < number_of_vertex; id++ ) {
       this->adjacency_list[id] = new Vertex( id );
     }
   }
