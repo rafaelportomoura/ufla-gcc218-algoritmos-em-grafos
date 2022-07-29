@@ -42,10 +42,10 @@ ostream& operator<<( ostream& output, const Resultado r ) {
 
 
 class DisjointSet {
-private:
+  private:
   int* pai;
   int* rank;
-public:
+  public:
   DisjointSet( int n ) {
     pai = new int[n];
     rank = new int[n];
@@ -53,11 +53,6 @@ public:
       pai[i] = i;
       rank[i] = 0;
     }
-  }
-
-  ~DisjointSet() {
-    delete[ ] pai;
-    delete[ ] rank;
   }
 
   int busca_pai( int u ) {
@@ -89,7 +84,7 @@ public:
 
 
 class Hill_Valey {
-public:
+  public:
   Hill_Valey( const int pontos_principais, const int ligacoes ) {
     this->ligacoes = ligacoes;
     this->pontos_principais = pontos_principais;
@@ -102,8 +97,7 @@ public:
     int i = 0;
     int resultado = 0;
     DisjointSet dj( this->pontos_principais );
-    Aresta menor = arestas[i];
-    while ( arestas_encontradas < this->pontos_principais - 1 ) {
+    while ( i < this->ligacoes and arestas_encontradas < this->pontos_principais - 1 ) {
       Aresta a = arestas[i];
       if ( !dj.mesmo_conjunto( a.u, a.v ) ) {
         dj.conecta( a.u, a.v );
@@ -122,7 +116,7 @@ public:
 
     return resultado;
   }
-private:
+  private:
   int pontos_principais;
   int ligacoes;
   vector<Aresta> arestas;
