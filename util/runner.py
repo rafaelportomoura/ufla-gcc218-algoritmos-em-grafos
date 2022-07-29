@@ -26,18 +26,36 @@ def getInput(is_numeric=0, input_file=1):
             return f' < {input_file}'
     return ''
 
+def read(file):
+    with open(file, 'r') as f:
+        text = f.read()
+        return text
+
+def write(file, text):
+    with open(file, 'w') as f:
+        f.write(text)
 
 def exec_cmd():
     input_file = getInput()
+    all_tests = ''
     if input_file.isnumeric():
         for i in range(int(input_file)):
-            cmd = f'./{exe}{getInput(1,i+1)}{getOutput(1,i+1)}'
+            output_file = getOutput(1,i+1)
+            cmd = f'./{exe}{getInput(1,i+1)}{output_file}'
             print(cmd)
+            test = read(output_file.replace(' > ',''))
+            all_tests += f'Teste {i+1}\n'
+            all_tests += f'{test}\n'
             os.system(cmd)
     else:
-        cmd = f'./{exe}{input_file}{getOutput()}'
+        output_file = getOutput()
+        cmd = f'./{exe}{input_file}{output_file}'
+        test = read(output_file.replace(' > ',''))
+        all_tests += test
         print(cmd)
         os.system(cmd)
+
+    write('test/all.out',all_tests)
 
 
 exec_cmd()
