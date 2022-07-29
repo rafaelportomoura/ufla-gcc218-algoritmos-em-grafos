@@ -4,13 +4,26 @@
 
 using namespace std;
 
+enum COR {
+  BRANCO,
+  CINZA,
+  PRETO
+};
 struct Aresta {
   int u;
   int v;
   int custo;
 
+  void swap() {
+    int aux = u;
+    u = v;
+    v = aux;
+  }
   static bool compare( Aresta a1, Aresta a2 ) {
     return a1.custo < a2.custo;
+  }
+  bool operator!=( const Aresta a2 ) {
+    return !( ( a2.u == u ) && ( a2.v == v ) || ( a2.u == v ) && ( a2.v == u ) );
   }
 };
 
@@ -94,8 +107,80 @@ class Hill_Valey {
   Hill_Valey( const int pontos_principais, const int ligacoes ) {
     this->ligacoes = ligacoes;
     this->pontos_principais = pontos_principais;
+    grafo = new vector<Aresta>[pontos_principais + 1];
     ler_ligacoes_de_pontos();
   }
+  Resultado retorna_resultados( int quantidade_de_resultados ) {
+    Resultado resultado( quantidade_de_resultados );
+    for ( int i = 0; i < quantidade_de_resultados; i++ ) {
+      resultado += this->DFS() + this->Kruskall();
+    }
+
+    return resultado;
+  }
+  private:
+  int pontos_principais;
+  int ligacoes;
+  vector<Aresta> arestas;
+  vector<Aresta> arestas_nao_usadas;
+  vector<Aresta>* grafo;
+
+  void ler_ligacoes_de_pontos() {
+    for ( int ligacao = 0; ligacao < this->ligacoes; ligacao++ ) {
+      Aresta aresta;
+      cin >> aresta.u >> aresta.v >> aresta.custo;
+      this->arestas.push_back( aresta );
+    }
+  }
+
+  bool menor_diferenca( vector<Aresta>* grafo, int u, int* cor, int* pai, Aresta a, int* menor ) {
+    cor[u] = COR::CINZA;
+    bool encontrou_ciclo = false;
+    for ( Aresta aresta : grafo[u] ) {
+      if ( pai[u] == aresta.v ) continue;
+      if ( cor[aresta.v] == COR::BRANCO ) {
+        pai[aresta.v] = u;
+        encontrou_ciclo = menor_diferenca( grafo, aresta.v, cor, pai, a, menor );
+      }
+      else if ( cor[aresta.v] == COR::CINZA ) {
+        encontrou_ciclo = true;
+      }
+      if ( encontrou_ciclo ) {
+        if ( !( ( a.u == aresta.u ) && ( a.v == aresta.v ) || ( a.u == aresta.v ) && ( a.v == aresta.u ) ) ) {
+          int diferenca_peso = a.custo - aresta.custo;
+          if ( diferenca_peso < *menor ) {
+            *menor = diferenca_peso;
+          }
+        }
+        return encontrou_ciclo;
+      }
+    }
+    cor[u] = COR::PRETO;
+    return encontrou_ciclo;
+  }
+
+  int DFS() {
+    if ( not this->arestas_nao_usadas.size() ) return 0;
+    int* menor_diff = new int;
+    *menor_diff = INT32_MAX;
+    int* pai = new int[pontos_principais + 1];
+    int* cor = new int[pontos_principais + 1];
+
+    for ( Aresta a : arestas_nao_usadas ) {
+      for ( int i = 0; i <= pontos_principais; i++ ) {
+        pai[i] = -1;
+        cor[i] = COR::BRANCO;
+      }
+      grafo[a.u].push_back( a );
+      a.swap();
+      grafo[a.u].push_back( a );
+      menor_diferenca( grafo, a.u, cor, pai, a, menor_diff );
+      grafo[a.u].pop_back();
+      grafo[a.v].pop_back();
+    }
+    return *menor_diff;
+  }
+
   int Kruskall() {
     sort( this->arestas.begin(), this->arestas.end(), Aresta::compare );
 
@@ -109,29 +194,16 @@ class Hill_Valey {
         dj.conecta( a.u, a.v );
         arestas_encontradas++;
         resultado += a.custo;
+        grafo[a.u].push_back( a );
+        a.swap();
+        grafo[a.u].push_back( a );
+      }
+      else {
+        arestas_nao_usadas.push_back( a );
       }
       i++;
     }
     return resultado;
-  }
-  Resultado retorna_resultados( int quantidade_de_resultados ) {
-    Resultado resultado( quantidade_de_resultados );
-    for ( int i = 0; i < quantidade_de_resultados; i++ ) {
-      resultado += this->Kruskall();
-    }
-
-    return resultado;
-  }
-  private:
-  int pontos_principais;
-  int ligacoes;
-  vector<Aresta> arestas;
-  void ler_ligacoes_de_pontos() {
-    for ( int ligacao = 0; ligacao < this->ligacoes; ligacao++ ) {
-      Aresta aresta;
-      cin >> aresta.u >> aresta.v >> aresta.custo;
-      this->arestas.push_back( aresta );
-    }
   }
 };
 
