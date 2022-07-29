@@ -45,11 +45,17 @@ class DisjointSet {
   private:
   int* pai;
   int* rank;
+  int tam;
+  int tam_vector;
+  int init_vector;
   public:
   DisjointSet( int n ) {
-    pai = new int[n];
-    rank = new int[n];
-    for ( int i = 0; i < n; i++ ) {
+    this->tam = n;
+    this->init_vector = 1;
+    this->tam_vector = this->tam + init_vector;
+    pai = new int[this->tam_vector];
+    rank = new int[this->tam_vector];
+    for ( int i = this->init_vector; i < this->tam_vector; i++ ) {
       pai[i] = i;
       rank[i] = 0;
     }
