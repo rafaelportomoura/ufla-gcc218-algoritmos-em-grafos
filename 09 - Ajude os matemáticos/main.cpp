@@ -1,256 +1,175 @@
 #include <iostream>
+#include <queue>
 #include <vector>
+
 
 using namespace std;
 
-enum Status {
-  NOT_VISITED,
-  VISITED,
-  CFC_NULL
+enum Color {
+  WHITE,
+  GRAY,
+  BLACK
 };
 
-ostream& operator<<( ostream& output, const Status& s ) {
-  switch ( s ) {
-    case NOT_VISITED:
-      output << "NOT_VISITED";
-      break;
-
-    case VISITED:
-      output << "VISITED";
-      break;
-
-    case CFC_NULL:
-      output << "CFC_NULL";
-      break;
-
-    default:
-      output << s;
-      break;
-  }
-  return output;
-}
-
-struct Edges {
-  int u;
-  int v;
-  bool ciclica;
-  Edges( int u, int v ) {
-    this->u = u;
-    this->v = v;
-    ciclica = false;
-  }
-  bool is_this_edge( int u, int v ) {
-    if ( u == this->u and v == this->v ) return true;
-    if ( v == this->u and u == this->v ) return true;
-    return false;
-  }
-  int getOther( int u ) {
-    if ( u == this->u ) return this->v;
-    return this->u;
-  }
-  int getOtherTwo( int u, int v ) {
-    if ( has( u ) ) return getOther( u );
-    return getOther( v );
-  }
-  bool has_one_of_two( Edges e ) {
-    return has( e.u ) || has( e.v );
-  }
-  bool has( int u ) {
-    return u == this->v or u == this->u;
-  }
-  bool equal( Edges e ) {
-    if ( e.u == this->u )
-      if ( e.v == this->v )
-        return true;
-    return false;
-  }
-};
-
-ostream& operator<<( ostream& output, const Edges& edges ) {
-  output << edges.u + 1 << "-" << edges.v + 1;
-  return output;
-}
 
 class Vertex {
   public:
   Vertex( int id ) {
     this->id = id;
+    this->degree = 0;
     this->father = NULL;
-    this->status = NOT_VISITED;
+    this->color = WHITE;
+    this->distance = 0;
   }
   int getId() { return this->id; }
+  int getDegree() const { return this->degree; }
+  void upDegree() { this->degree++; }
+  vector<Vertex*> getAdjacencyList() { return this->adjacency_list; }
+  void makeHeap() {
+    for ( Vertex* x : this->adjacency_list ) {
+      this->heap.push( *x );
+    }
+  }
+  priority_queue<Vertex> getHeap() { return this->heap; }
+  void addEdge( Vertex* v ) {
+    if ( !v ) return;
+    this->adjacency_list.push_back( v );
+  }
   void setFather( Vertex* father ) {
     if ( !father ) return;
 
     this->father = father;
+    this->distance = father->getDistance() + 1;
   }
   Vertex* getFather() { return this->father; }
-  void changeStatus( Status c ) { this->status = c; }
-  Status getStatus() { return this->status; }
-  void addEdge( Edges* edge ) {
-    if ( !edge ) return;
-
-    edges.push_back( edge );
-  }
-  vector<Edges*> getEdges() { return this->edges; }
-  friend ostream& operator<<( ostream& output, const Vertex v ) {
-    if ( v.edges.empty() ) return output;
-    output << "ID: " << v.id + 1;
-    output << "\n\tStatus: " << v.status;
-    output << "\n\tFather: ";
-    if ( v.father ) output << v.father->getId() + 1;
-    else output << "NULL";
-    output << "\n\tEdges: ";
-    for ( Edges* x : v.edges ) {
-      output << *x << " ";
-    }
-    output << endl << endl;
-    return output;
-  }
+  int getDistance() { return this->distance; }
+  void changeColor( Color c ) { this->color = c; }
+  Color getColor() { return this->color; }
   private:
   int id;
+  int degree;
+  vector<Vertex*> adjacency_list;
+  priority_queue<Vertex> heap;
   Vertex* father;
-  Status status;
-  vector<Edges*> edges;
+  Color color;
+  int distance;
+
 };
 
-class Graph {
+bool operator<( Vertex const& u, Vertex const& v ) {
+  return u.getDegree() > v.getDegree();
+}
+
+class NotDirectedGraph {
   public:
-  Graph( int number_of_vertex ) {
+  NotDirectedGraph( int number_of_vertex ) {
     this->number_of_vertex = number_of_vertex;
-    this->adjacency_list = new Vertex * [number_of_vertex];
-    for ( int id = 0; id < number_of_vertex; id++ ) {
-      this->adjacency_list[id] = new Vertex( id );
+    vertex_list = new Vertex * [this->number_of_vertex];
+    for ( int i = 0; i < this->number_of_vertex; i++ ) {
+      vertex_list[i] = new Vertex( i );
     }
   }
-
   void addEdge( int u, int v ) {
-    Edges* edge = new Edges( u, v );
-    this->edges.push_back( edge );
-    this->adjacency_list[u]->addEdge( edge );
-    this->adjacency_list[v]->addEdge( edge );
+    this->vertex_list[u]->addEdge( this->vertex_list[v] );
+    this->vertex_list[v]->addEdge( this->vertex_list[u] );
+  }
+  void BFS_Search( int vertex, queue<int>& bfs_queue ) {
+    priority_queue<Vertex> heap = this->vertex_list[vertex]->getHeap();
+    while ( !heap.empty() ) {
+      Vertex v = heap.top();
+      Vertex* edge = this->vertex_list[v.getId()];
+      heap.pop();
+      if ( edge->getColor() == WHITE ) {
+        edge->changeColor( GRAY );
+        edge->setFather( this->vertex_list[vertex] );
+        this->direct_graph_adjacency_matrix[vertex][edge->getId()] = 1;
+        bfs_queue.push( edge->getId() );
+      }
+    }
+  }
+  void BFS( int root ) {
+    queue<int> bfs_queue;
+    bfs_queue.push( root );
+    while ( !bfs_queue.empty() ) {
+      int search = bfs_queue.front();
+      bfs_queue.pop();
+      if ( this->vertex_list[search]->getColor() == WHITE ) {
+        this->vertex_list[search]->changeColor( GRAY );
+      }
+      BFS_Search( search, bfs_queue );
+      this->vertex_list[search]->changeColor( BLACK );
+    }
+  }
+  int** getDirectGraph( int** adjacency_matrix, int source ) {
+    this->direct_graph_adjacency_matrix = adjacency_matrix;
+    for ( int i = 0; i < this->number_of_vertex; i++ ) this->vertex_list[i]->makeHeap();
+    BFS( source );
+    return this->direct_graph_adjacency_matrix;
+  }
+  private:
+  Vertex** vertex_list;
+  int** direct_graph_adjacency_matrix;
+  int number_of_vertex;
+};
+
+class DirectedGraph {
+  public:
+  DirectedGraph( NotDirectedGraph g, int source_adjacency, int target_adjacency, int number_of_vertex ) {
+    this->number_of_vertex = number_of_vertex + 2;
+    this->source_vertex = number_of_vertex;
+    this->target_vertex = number_of_vertex + 1;
+    this->adjacency_matrix = new int* [this->number_of_vertex];
+    for ( int i = 0; i < this->number_of_vertex; i++ ) {
+      this->adjacency_matrix[i] = new int[this->number_of_vertex];
+      for ( int j = 0; j < this->number_of_vertex; j++ ) {
+        this->adjacency_matrix[i][j] = 0;
+      }
+    }
+    CreateDirectedGraph( g, source_adjacency, target_adjacency );
+  }
+  int Edmonds_Karp() {
+
   }
 
-  friend ostream& operator<<( ostream& output, const Graph g ) {
+  friend ostream& operator<<( ostream& output, const DirectedGraph g ) {
     output << "Number of vertex: " << g.number_of_vertex << endl;
     output << "Adjacency list:\n";
     for ( int id = 0; id < g.number_of_vertex; id++ ) {
-      output << *g.adjacency_list[id];
-    }
-    output << "Cicles:\n";
-    int c = 1;
-    for ( vector<Edges*> ve : g.cicles ) {
-      output << "Cicle " << c << ": ";
-      c++;
-      int u = -1, v = -1;
-      for ( Edges* e : ve ) {
-        if ( u == -1 and v == -1 ) {
-          output << *e;
-        }
-        else {
-          output << "-" << e->getOtherTwo( u, v ) + 1;
-        }
-        u = e->u;
-        v = e->v;
+      for ( int column = 0; column < g.number_of_vertex; column++ ) {
+        output << g.adjacency_matrix[id][column] << " ";
       }
       output << endl;
     }
     return output;
   }
-
-  bool find_cicle( vector<Edges>& stack, Edges& e, Edges& s_edge, vector<Edges*>& cicle, int id ) {
-    s_edge = stack.back();
-    if ( !s_edge.has_one_of_two( e ) ) {
-      Edges x( id, id );
-      s_edge = x;
-      return false;
-    };
-    for ( Edges* edge : this->edges ) {
-      if ( edge->equal( s_edge ) and !edge->ciclica ) {
-        stack.pop_back();
-        e = s_edge;
-        cicle.push_back( edge );
-      }
-    }
-    return true;
-  }
-
-  void DFS_VISIT( int id, vector<Edges>& stack ) {
-    vector<Edges*> adjacency_vertex;
-    adjacency_vertex = this->adjacency_list[id]->getEdges();
-    for ( Edges* edge : adjacency_vertex ) {
-      Vertex* v = this->adjacency_list[edge->getOther( id )];
-      if ( v->getStatus() == NOT_VISITED ) {
-        stack.push_back( *edge );
-        v->changeStatus( VISITED );
-        v->setFather( this->adjacency_list[id] );
-        DFS_VISIT( v->getId(), stack );
-      }
-      else {
-        Vertex* father = this->adjacency_list[id]->getFather();
-        if ( father ) {
-          if ( v->getId() != father->getId() and !edge->ciclica ) {
-            vector<Edges*> cicle;
-            cicle.push_back( edge );
-            Edges s_edge( -1, -1 );
-            Edges old( edge->u, edge->v );
-            bool add_cicle = false;
-            do {
-              add_cicle = this->find_cicle( stack, old, s_edge, cicle, v->getId() );
-              if ( !add_cicle ) {
-                stack.push_back( *edge );
-              }
-            } while ( !stack.empty() and !s_edge.has( v->getId() ) );
-            if ( add_cicle ) {
-              for ( Edges* _ : cicle ) {
-                _->ciclica = true;
-              }
-              this->cicles.push_back( cicle );
-            }
-          }
-        }
-      }
-    }
-  }
-  void addXY( int u, int v ) {
-    this->x = this->adjacency_list[u];
-    this->y = this->adjacency_list[v];
-  }
-
-  void DFS() {
-    vector<Edges> stack;
-    for ( int id = 0; id < this->number_of_vertex; id++ ) {
-    // int id = this->x->getId();
-      if ( this->adjacency_list[id]->getStatus() == NOT_VISITED ) {
-        this->adjacency_list[id]->changeStatus( VISITED );
-        DFS_VISIT( id, stack );
-      }
-    }
-  }
-
   private:
-  vector<vector<Edges*>> cicles;
-  vector<Edges*> edges;
-  Vertex** adjacency_list;
+  void CreateDirectedGraph( NotDirectedGraph g, int source_adjacency, int target_adjacency ) {
+    this->adjacency_matrix = g.getDirectGraph( this->adjacency_matrix, source_adjacency );
+    this->adjacency_matrix[this->source_vertex][source_adjacency] = 2;
+    this->adjacency_matrix[target_adjacency][this->target_vertex] = 2;
+  }
+  int** adjacency_matrix;
   int number_of_vertex;
-  Vertex* x;
-  Vertex* y;
+
+  int source_vertex;
+  int target_vertex;
 };
 
 int main() {
   int number_of_vertex, number_of_edges, u, v;
   cin >> number_of_vertex >> number_of_edges;
   while ( number_of_vertex && number_of_edges ) {
-    Graph g( number_of_vertex );
+    NotDirectedGraph g( number_of_vertex );
     for ( int i = 0; i < number_of_edges; i++ ) {
       cin >> u >> v;
       g.addEdge( u - 1, v - 1 );
     }
     cin >> u >> v;
-    g.addXY( u - 1, v - 1 );
-    g.DFS();
-    cout << g;
+    g.BFS( u - 1 );
+    DirectedGraph dg( g, u - 1, v - 1, number_of_vertex );
+    cout << dg;
     cin >> number_of_vertex >> number_of_edges;
   }
+
   return 0;
 }
