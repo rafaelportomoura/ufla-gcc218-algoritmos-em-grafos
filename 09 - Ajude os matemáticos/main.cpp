@@ -6,12 +6,6 @@
 
 using namespace std;
 
-enum Color {
-  WHITE,
-  GRAY,
-  BLACK
-};
-
 struct NotDirectGraphVertexStruct {
   int father;
   int dist;
