@@ -1,0 +1,15 @@
+Utilizamos o algoritmo de Edmonds_Karp para resolver o problema com fluxo máximo.
+
+Para isso criamos:
+- um vértice origem que liga ao vértice X com uma aresta de peso 2 
+- um vértice alvo que liga ao vértice Y com uma aresta de peso 2
+- As demais arestas tem peso 1
+
+Inicia o algoritmo de vértice de origem, e como cada outra aresta possui somente 1 de peso, 
+para chegar no vértice alvo, é necessário um ciclo para que tenha 2 vértices incidindo com peso nele,
+caso não haja uma sequência de ciclos o maior valor do fluxo seria 1.
+
+Dessa forma é feita uma comparação para ver se o fluxo máximo retornado é 2. Se for retorna 1 se não for
+retorna 0.
+
+Quando retornado 1 é um Subgrafo EW.
