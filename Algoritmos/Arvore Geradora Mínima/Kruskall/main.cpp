@@ -22,7 +22,7 @@ struct Edge {
 
 struct Comparator {
   bool operator()( Edge a, Edge b ) {
-   //Sorting on the basis of height(Just for example)
+
     return ( a.weight > b.weight );
   }
 };
