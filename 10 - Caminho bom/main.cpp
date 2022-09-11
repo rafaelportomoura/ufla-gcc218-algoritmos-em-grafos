@@ -10,7 +10,7 @@ using namespace std;
 
 using namespace std;
 
-typedef double Weight;
+typedef int Weight;
 
 struct Edge {
   int v;
@@ -109,12 +109,6 @@ class Graph {
     return good_way < INF ? good_way : -1;
   }
 
-  friend ostream& operator<<( ostream& out, const Graph& g ) {
-    for ( int i = 0; i < g.n; i++ ) {
-      out << "Estimativa " << g.root + 1 << " -> " << i + 1 << " = " << g.estimated[i] << endl;
-    }
-    return out;
-  }
   private:
   int n;
   int root;
