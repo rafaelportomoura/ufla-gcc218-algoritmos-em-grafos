@@ -6,7 +6,7 @@ using namespace std;
 #include <vector>
 #include <queue>
 
-#define INF INT16_MAX
+#define INF INT32_MAX
 
 using namespace std;
 
@@ -25,7 +25,7 @@ typedef priority_queue < Edge, vector<Edge>, Comparator> Heap;
 
 
 class Graph {
-public:
+  public:
   Graph( int n ) :n( n ) {
     this->la = new vla[n];
   }
@@ -115,7 +115,7 @@ public:
     }
     return out;
   }
-private:
+  private:
   int n;
   int root;
   vector<int> father;
